@@ -52,6 +52,10 @@ public final class ShellIconSweep {
     // larger than MAX_FONT down to TARGET_FONT so the UI reads at a modern size.
     private static final int MAX_FONT = 30;
     private static final int TARGET_FONT = 14;
+    // Original /buttons/ and /menu/ PNGs are small; render replacements larger so they're legible.
+    private static final float ICON_SCALE = 1.45f;
+    private static final int MIN_ICON = 28;
+    private static final int MAX_ICON = 64;
     private static boolean listenerInstalled = false;
 
     private ShellIconSweep() {
@@ -257,7 +261,10 @@ public final class ShellIconSweep {
         if (w <= 0 || h <= 0) {
             return null;
         }
-        BufferedImage img = ShellIcons.renderButton(name, w, h);
+        // The original PNGs are tiny (e.g. 24px), which reads as a small icon. Render a larger,
+        // square icon so it's comfortably visible; buttons that size to content grow to fit.
+        int target = Math.min(MAX_ICON, Math.max(MIN_ICON, Math.round(Math.max(w, h) * ICON_SCALE)));
+        BufferedImage img = ShellIcons.renderButton(name, target, target);
         if (img == null) {
             return null;
         }

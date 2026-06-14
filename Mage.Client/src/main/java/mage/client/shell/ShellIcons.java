@@ -161,7 +161,7 @@ public final class ShellIcons {
             double oy = (h - box) / 2.0;
             g.translate(ox, oy);
             g.scale(box, box);
-            g.setStroke(new BasicStroke(0.13f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setStroke(new BasicStroke(0.11f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
             glyph.draw(g, foreground(), accent());
         } finally {
@@ -190,7 +190,7 @@ public final class ShellIcons {
             double o = (s - box) / 2.0;
             g.translate(o, o);
             g.scale(box, box);
-            g.setStroke(new BasicStroke(0.12f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setStroke(new BasicStroke(0.10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             glyph.draw(g, foreground(), accent());
         } finally {
             g.dispose();
