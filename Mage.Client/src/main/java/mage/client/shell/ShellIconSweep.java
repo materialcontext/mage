@@ -3,9 +3,18 @@ package mage.client.shell;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
@@ -66,6 +75,9 @@ public final class ShellIconSweep {
 
     private static void sweep(Component c) {
         clampFont(c);
+        if (c instanceof JComponent) {
+            flattenBorder((JComponent) c);
+        }
         if (c instanceof AbstractButton) {
             sweepButton((AbstractButton) c);
         } else if (c instanceof JLabel) {
@@ -87,6 +99,69 @@ public final class ShellIconSweep {
         Font f = c.getFont();
         if (f != null && f.getSize() > MAX_FONT) {
             c.setFont(f.deriveFont((float) TARGET_FONT));
+        }
+    }
+
+    /** Replace dated etched/bevel/grey-line borders with a flat modern line. */
+    private static void flattenBorder(JComponent c) {
+        Border b = c.getBorder();
+        Border flat = flatten(b);
+        if (flat != b) {
+            c.setBorder(flat);
+        }
+    }
+
+    private static Border flatten(Border b) {
+        if (b == null || b instanceof ShellFlatBorder) {
+            return b;
+        }
+        if (b instanceof EtchedBorder || b instanceof BevelBorder) {
+            return flatLine();
+        }
+        if (b instanceof LineBorder) {
+            return isGrey(((LineBorder) b).getLineColor()) ? flatLine() : b;
+        }
+        if (b instanceof TitledBorder) {
+            TitledBorder tb = (TitledBorder) b;
+            Border inner = tb.getBorder();
+            Border flatInner = flatten(inner);
+            if (flatInner != inner) {
+                tb.setBorder(flatInner);
+            }
+            return tb;
+        }
+        if (b instanceof CompoundBorder) {
+            CompoundBorder cb = (CompoundBorder) b;
+            Border out = flatten(cb.getOutsideBorder());
+            Border in = flatten(cb.getInsideBorder());
+            if (out != cb.getOutsideBorder() || in != cb.getInsideBorder()) {
+                return new CompoundBorder(out, in);
+            }
+            return b;
+        }
+        return b; // leave EmptyBorder, MatteBorder, FlatLaf's own borders, etc.
+    }
+
+    private static boolean isGrey(Color c) {
+        if (c == null) {
+            return false;
+        }
+        int r = c.getRed(), g = c.getGreen(), bl = c.getBlue();
+        return Math.abs(r - g) < 24 && Math.abs(g - bl) < 24 && Math.abs(r - bl) < 24;
+    }
+
+    private static Border flatLine() {
+        Color col = UIManager.getColor("Component.borderColor");
+        if (col == null) {
+            col = new Color(0x3A3A3A);
+        }
+        return new ShellFlatBorder(col);
+    }
+
+    /** Marker so a later re-sweep recognises our own flat borders and leaves them alone. */
+    private static final class ShellFlatBorder extends LineBorder {
+        ShellFlatBorder(Color color) {
+            super(color, 1);
         }
     }
 

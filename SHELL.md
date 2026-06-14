@@ -26,7 +26,11 @@ at a tiny, documented set of "seams."
     arrows, and the top menu bar (preferences, connect, deck editor, collection, feedback, images,
     about) — swapped app-wide by a component-tree sweep keyed on the `/buttons/` and `/menu/` source
     paths (no edits to the generated code). Mana-colour and card-type icons are left as-is. The same
-    sweep also clamps absurd hard-coded fonts (e.g. the 48pt main toolbar) to a modern size.
+    sweep also clamps absurd hard-coded fonts (e.g. the 48pt main toolbar) to a modern size, and
+    flattens dated etched/bevel/grey-line borders into flat modern lines.
+- **Match (in-game) screen — aggressive restyle** 🚧 (chosen direction: keep `GamePanel` structure
+  and game logic, modernize via shell mechanisms). Started with app-wide border flattening; next:
+  player-panel / phase-bar / feedback-area layout and spacing.
 - **Phase 3 — Structural / interaction** ⏳ planned (see `SHELL_OBSERVATIONS.md` for play-area leads).
 
 See `SHELL_OBSERVATIONS.md` for a passive catalog of memory and play-area/4-player observations
