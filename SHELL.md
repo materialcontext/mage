@@ -1,13 +1,14 @@
 # Modern UI Shell
 
-An **opt-in, additive** modernization layer for the XMage Swing client. It is designed to
+An **always-on, additive** modernization layer for the XMage Swing client. It is designed to
 **survive upstream `master` updates that ignore our changes**: the overwhelming majority of the
 code lives in brand-new files (which never produce merge conflicts), and it touches upstream code
 at a tiny, documented set of "seams."
 
 ## Status
 
-- **Phase 0 — Foundation** ✅ feature flag, FlatLaf installer, seam, this manifest.
+- **Phase 0 — Foundation** ✅ FlatLaf installer, seams, this manifest. (The shell is now **always
+  on** — the original opt-in flag was removed; see Activation.)
 - **Phase 1 — Theming** ✅ dark ("Arcane Dark") + light ("Arcane Parchment") variants, magic-flavored
   palette, rounded controls, slim scrollbars — all via additive `FlatLaf.properties` files.
 - **Phase 2 — Component restyling & density** 🚧 in progress:
@@ -37,25 +38,21 @@ at a tiny, documented set of "seams."
 See `SHELL_OBSERVATIONS.md` for a passive catalog of memory and play-area/4-player observations
 collected while building the shell.
 
-## How to enable
+## Activation
 
-The shell is **off by default** — stock Nimbus is untouched. Turn it on with either:
+The shell is **always on** — there is no enable/disable flag, and stock Nimbus is no longer
+reachable. `Shell.isEnabled()` is kept (always returns `true`) only so the one-line seam call sites
+stay readable without editing them.
 
-```bash
-# environment variable
-XMAGE_SHELL=1   java ... mage.client.MageFrame
+The LAF is installed in `MageFrame.main()` *before* the UI is built, and the component sweep runs
+`SwingUtilities.updateComponentTreeUI(window)` on every window as it opens — the same thing a theme
+reselect does — so the shell applies on first render (no reselect needed).
 
-# or system property
-java -Dxmage.shell=1 ... mage.client.MageFrame
-```
-
-Accepted truthy values: `1`, `true`, `on`, `yes`, `enabled`.
-
-Pick the variant (defaults to dark) with `XMAGE_SHELL_THEME` / `-Dxmage.shell.theme`:
+Only the **variant** is selectable (defaults to dark) via `XMAGE_SHELL_THEME` / `-Dxmage.shell.theme`:
 
 ```bash
-XMAGE_SHELL=1 XMAGE_SHELL_THEME=light   java ...   # Arcane Parchment (light)
-XMAGE_SHELL=1                           java ...   # Arcane Dark (default)
+XMAGE_SHELL_THEME=light   java ...   # Arcane Parchment (light)
+java ...                             # Arcane Dark (default)
 ```
 
 > **Running on Java 17/21 directly?** XMage's networking needs deep reflective access into
@@ -71,8 +68,9 @@ XMAGE_SHELL=1                           java ...   # Arcane Dark (default)
 2. **Minimal seams.** Where upstream code *must* call into the shell, the edit is a single guarded
    line behind `Shell.isEnabled()`. Each seam is tagged with the marker `[modern-shell]` so they
    are greppable, and listed in the table below.
-3. **Opt-in / default off.** With the flag unset, the seams are inert and the client behaves exactly
-   like upstream. This makes A/B comparison trivial and keeps risk near zero.
+3. **Always on.** The shell has no enable/disable flag; `Shell.isEnabled()` returns `true` so the
+   seam call sites stay readable without edits. (It applies on first render because the LAF installs
+   before the UI is built and the sweep forces it onto each window as it opens.)
 4. **Theming as data.** Visual styling lives in `FlatLaf.properties` (a FlatLaf custom defaults
    source), so most look changes need no Java edits at all.
 

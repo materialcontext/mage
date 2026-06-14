@@ -8,29 +8,22 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 /**
- * Entry point for the opt-in "modern UI shell".
+ * Entry point for the modern UI shell.
  * <p>
- * Design goals (see {@code SHELL.md} at the repo root):
+ * The shell is <b>always on</b> — there is no enable/disable flag. {@link #isEnabled()} is kept
+ * (returning {@code true}) only so the existing one-line seams read clearly and need no edits.
+ * <p>
+ * Design notes (see {@code SHELL.md} at the repo root):
  * <ul>
  *     <li><b>Additive.</b> Practically all shell code lives in this new {@code mage.client.shell}
- *     package and in additive resources, so upstream merges of {@code master} never conflict here.</li>
- *     <li><b>Single seam.</b> The shell is wired into the existing client at exactly one place
- *     ({@code GuiDisplayUtil.refreshThemeSettings()}), behind {@link #isEnabled()}.</li>
- *     <li><b>Opt-in, default off.</b> Stock XMage behaviour is byte-for-byte unchanged unless the
- *     {@code xmage.shell} system property or {@code XMAGE_SHELL} environment variable is truthy.</li>
+ *     package and in additive resources, so upstream merges of {@code master} rarely conflict.</li>
+ *     <li><b>Few seams.</b> The shell is wired into the existing client at a small, documented set
+ *     of one-line call sites.</li>
  * </ul>
- * Because the shell is dormant by default, dropping these files onto any future version of the
- * client is safe even if the surrounding code has drifted.
  *
  * @author modern-shell
  */
 public final class Shell {
-
-    /** System property that enables the shell, e.g. {@code -Dxmage.shell=1}. */
-    public static final String PROPERTY = "xmage.shell";
-
-    /** Environment variable that enables the shell, e.g. {@code XMAGE_SHELL=1}. */
-    public static final String ENV = "XMAGE_SHELL";
 
     /** System property selecting the variant ({@code dark} or {@code light}); defaults to dark. */
     public static final String THEME_PROPERTY = "xmage.shell.theme";
@@ -45,52 +38,21 @@ public final class Shell {
      */
     private static final String DEFAULTS_PACKAGE = "mage.client.shell";
 
-    private static volatile Boolean enabledCache;
     private static boolean defaultsRegistered;
 
     private Shell() {
     }
 
     /**
-     * @return true when the modern shell should replace the stock Nimbus look-and-feel.
-     * Resolved once and cached for the lifetime of the process.
+     * @return always {@code true}. The shell has no off switch; kept so the seam call sites stay
+     * readable and unchanged.
      */
     public static boolean isEnabled() {
-        Boolean cached = enabledCache;
-        if (cached == null) {
-            cached = resolveEnabled();
-            enabledCache = cached;
-        }
-        return cached;
-    }
-
-    private static boolean resolveEnabled() {
-        String prop = System.getProperty(PROPERTY);
-        if (prop != null) {
-            return isTruthy(prop);
-        }
-        return isTruthy(System.getenv(ENV));
-    }
-
-    private static boolean isTruthy(String value) {
-        if (value == null) {
-            return false;
-        }
-        switch (value.trim().toLowerCase()) {
-            case "1":
-            case "true":
-            case "on":
-            case "yes":
-            case "enabled":
-                return true;
-            default:
-                return false;
-        }
+        return true;
     }
 
     /**
-     * Install the modern look-and-feel. Called from the client's single LAF-install seam when
-     * {@link #isEnabled()} is true.
+     * Install the modern look-and-feel. Called from the client's LAF-install seams.
      * <p>
      * All concrete styling (accent colour, corner radii, scrollbar shape, spacing) is expressed in
      * the additive {@code FlatLaf.properties} resource in this package, so it can be tuned without
