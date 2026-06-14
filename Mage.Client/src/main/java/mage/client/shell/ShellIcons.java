@@ -66,6 +66,15 @@ public final class ShellIcons {
         GLYPHS.put("up", ShellIcons::arrowUp);
         GLYPHS.put("down", ShellIcons::arrowDown);
 
+        // top menu bar (/menu/<name>.png)
+        GLYPHS.put("preferences", ShellIcons::menuPreferences);
+        GLYPHS.put("connect", ShellIcons::menuConnect);
+        GLYPHS.put("deck_editor", ShellIcons::menuDeckEditor);
+        GLYPHS.put("collection", ShellIcons::menuCollection);
+        GLYPHS.put("feedback", ShellIcons::menuFeedback);
+        GLYPHS.put("images", ShellIcons::menuImages);
+        GLYPHS.put("about", ShellIcons::menuAbout);
+
         PHASE_GLYPHS.put("untap", ShellIcons::phaseUntap);
         PHASE_GLYPHS.put("upkeep", ShellIcons::phaseUpkeep);
         PHASE_GLYPHS.put("draw", ShellIcons::phaseDraw);
@@ -434,6 +443,78 @@ public final class ShellIcons {
         line(g, 0.20, 0.62, 0.20, 0.80);
         line(g, 0.20, 0.80, 0.80, 0.80);
         line(g, 0.80, 0.80, 0.80, 0.62);
+    }
+
+    // --- top menu bar glyphs --------------------------------------------------------------------
+
+    private static void menuPreferences(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // settings sliders
+        double[] ys = {0.28, 0.50, 0.72};
+        double[] kx = {0.66, 0.34, 0.58};
+        for (int i = 0; i < 3; i++) {
+            line(g, 0.16, ys[i], 0.84, ys[i]);
+        }
+        g.setColor(accent);
+        for (int i = 0; i < 3; i++) {
+            g.fill(new Ellipse2D.Double(kx[i] - 0.07, ys[i] - 0.07, 0.14, 0.14));
+        }
+    }
+
+    private static void menuConnect(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // globe = connect to server
+        g.draw(new Ellipse2D.Double(0.16, 0.16, 0.68, 0.68));
+        g.draw(new Ellipse2D.Double(0.40, 0.16, 0.20, 0.68));  // meridian
+        line(g, 0.17, 0.50, 0.83, 0.50);                       // equator
+    }
+
+    private static void menuDeckEditor(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // stacked cards + pencil = edit deck
+        g.draw(new java.awt.geom.RoundRectangle2D.Double(0.18, 0.30, 0.34, 0.46, 0.08, 0.08));
+        g.draw(new java.awt.geom.RoundRectangle2D.Double(0.32, 0.20, 0.34, 0.46, 0.08, 0.08));
+        g.setColor(accent);
+        line(g, 0.58, 0.72, 0.80, 0.50);                       // pencil
+        line(g, 0.80, 0.50, 0.74, 0.44);
+    }
+
+    private static void menuCollection(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // 2x2 grid = collection
+        double s = 0.28;
+        g.draw(new Rectangle2D.Double(0.16, 0.16, s, s));
+        g.draw(new Rectangle2D.Double(0.56, 0.16, s, s));
+        g.draw(new Rectangle2D.Double(0.16, 0.56, s, s));
+        g.draw(new Rectangle2D.Double(0.56, 0.56, s, s));
+    }
+
+    private static void menuFeedback(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // speech bubble
+        g.draw(new java.awt.geom.RoundRectangle2D.Double(0.14, 0.18, 0.72, 0.48, 0.14, 0.14));
+        Path2D.Double tail = new Path2D.Double();
+        tail.moveTo(0.30, 0.64);
+        tail.lineTo(0.30, 0.84);
+        tail.lineTo(0.48, 0.64);
+        g.draw(tail);
+    }
+
+    private static void menuImages(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // picture (frame + mountain + sun)
+        g.draw(new java.awt.geom.RoundRectangle2D.Double(0.16, 0.22, 0.68, 0.56, 0.08, 0.08));
+        g.setColor(accent);
+        g.fill(new Ellipse2D.Double(0.28, 0.32, 0.12, 0.12)); // sun
+        Path2D.Double hill = new Path2D.Double();
+        hill.moveTo(0.20, 0.74);
+        hill.lineTo(0.42, 0.50);
+        hill.lineTo(0.58, 0.66);
+        hill.lineTo(0.70, 0.54);
+        hill.lineTo(0.80, 0.74);
+        g.draw(hill);
+    }
+
+    private static void menuAbout(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // info "i"
+        g.draw(new Ellipse2D.Double(0.16, 0.16, 0.68, 0.68));
+        g.setColor(accent);
+        g.fill(new Ellipse2D.Double(0.45, 0.30, 0.10, 0.10)); // dot
+        line(g, 0.50, 0.46, 0.50, 0.68);                       // stem
     }
 
     // --- phase glyphs ---------------------------------------------------------------------------

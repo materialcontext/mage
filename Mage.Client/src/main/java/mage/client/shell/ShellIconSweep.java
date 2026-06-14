@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
@@ -32,7 +33,11 @@ import java.awt.image.BufferedImage;
  */
 public final class ShellIconSweep {
 
-    private static final String MARKER = "/buttons/";
+    private static final String[] MARKERS = {"/buttons/", "/menu/"};
+    // Some controls hard-code an absurd font size (e.g. the 48pt main toolbar). Clamp anything
+    // larger than MAX_FONT down to TARGET_FONT so the UI reads at a modern size.
+    private static final int MAX_FONT = 30;
+    private static final int TARGET_FONT = 14;
     private static boolean listenerInstalled = false;
 
     private ShellIconSweep() {
@@ -60,6 +65,7 @@ public final class ShellIconSweep {
     }
 
     private static void sweep(Component c) {
+        clampFont(c);
         if (c instanceof AbstractButton) {
             sweepButton((AbstractButton) c);
         } else if (c instanceof JLabel) {
@@ -73,6 +79,14 @@ public final class ShellIconSweep {
             for (Component child : ((Container) c).getComponents()) {
                 sweep(child);
             }
+        }
+    }
+
+    /** Shrink hard-coded oversized fonts (idempotent: a re-sweep sees the already-clamped size). */
+    private static void clampFont(Component c) {
+        Font f = c.getFont();
+        if (f != null && f.getSize() > MAX_FONT) {
+            c.setFont(f.deriveFont((float) TARGET_FONT));
         }
     }
 
@@ -108,11 +122,18 @@ public final class ShellIconSweep {
         if (desc == null) {
             return null;
         }
-        int idx = desc.indexOf(MARKER);
-        if (idx < 0) {
+        int markerEnd = -1;
+        for (String marker : MARKERS) {
+            int idx = desc.indexOf(marker);
+            if (idx >= 0) {
+                markerEnd = idx + marker.length();
+                break;
+            }
+        }
+        if (markerEnd < 0) {
             return null;
         }
-        String name = desc.substring(idx + MARKER.length());
+        String name = desc.substring(markerEnd);
         int q = name.indexOf('?');
         if (q >= 0) {
             name = name.substring(0, q);
