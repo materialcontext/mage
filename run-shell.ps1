@@ -198,12 +198,15 @@ $clientArgs = @(
     '-Dsun.jnu.encoding=UTF-8',
     '-Djava.net.preferIPv4Stack=true'
 ) + $addOpens
+# Activate the shell via an environment variable (inherited by the launched java process). This is
+# more robust than a -Dxmage.shell=1 argument, which PowerShell can mangle (splitting at the dot).
 if ($NoShell) {
     Write-Step 'Starting STOCK client (shell off - baseline)'
+    $env:XMAGE_SHELL = '0'
 } else {
     Write-Step "Starting client with modern shell ($Theme)"
-    $clientArgs += '-Dxmage.shell=1'
-    $clientArgs += "-Dxmage.shell.theme=$Theme"
+    $env:XMAGE_SHELL = '1'
+    $env:XMAGE_SHELL_THEME = $Theme
 }
 $clientArgs += @('-jar', "`"$($clientJar.FullName)`"")
 
