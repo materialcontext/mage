@@ -22,9 +22,16 @@ at a tiny, documented set of "seams."
     dated PNGs for in-game command/skip buttons, the 12 phase icons, **and the round dialog
     Accept/Cancel/Next/Prev buttons**, intercepted in the image-cache loaders. Incremental —
     unmapped icons fall back to the original art. Icon colour is tunable via `Shell.iconColor`.
-  - Deck-editor / lobby icons (`ShellIconSweep`): search, copy, paste, import/export, nav arrows —
-    swapped app-wide by a component-tree sweep keyed on the `/buttons/` source path (no edits to the
-    generated dialog code). Mana-colour and card-type icons are intentionally left as-is.
+  - Deck-editor / lobby / top-menu icons (`ShellIconSweep`): the **full deck view** (card-type
+    filters, mana-colour filters incl. on/off, rarity gems, card/list view toggles, sideboard
+    in/out, deck states, drag insert markers), plus search/copy/paste/import/export, nav arrows, and
+    the top menu bar — swapped app-wide by a component-tree sweep keyed on the `/buttons/` and
+    `/menu/` source paths (plus a tight allowlist for a couple of bare resources). No edits to the
+    generated code. The same sweep also clamps absurd hard-coded fonts (e.g. the 48pt main toolbar)
+    and flattens dated etched/bevel/grey-line borders.
+- **Match (in-game) screen — aggressive restyle** 🚧 (chosen direction: keep `GamePanel` structure
+  and game logic, modernize via shell mechanisms). Started with app-wide border flattening; next:
+  player-panel / phase-bar / feedback-area layout and spacing.
 - **Phase 3 — Structural / interaction** ⏳ planned (see `SHELL_OBSERVATIONS.md` for play-area leads).
 
 See `SHELL_OBSERVATIONS.md` for a passive catalog of memory and play-area/4-player observations
@@ -83,6 +90,7 @@ to find any seam that didn't apply, and re-insert it from this table.
 | 5 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `createThemeButtonImage(key)`, try `ShellIcons.renderButton(...)` first when `Shell.isEnabled()`, else fall back to the original PNG. | One guarded block in the image-cache loader; returns `null` for unmapped icons so old art is kept. Incremental and non-breaking. |
 | 6 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `createPhaseThemeButtonImage(key)`, try `ShellIcons.renderPhase(...)` first when `Shell.isEnabled()`, else fall back to the original PNG. | Same pattern as #5 for phase icons; `null` keeps the old art. |
 | 7 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `getBufferedImageFromResource(path)`, when `Shell.isEnabled()` and the path contains `/dlg/`, try `ShellIcons.renderDialogButton(...)`, else fall back. | Single guarded line, narrowed to `/dlg/` so non-dialog images are untouched; covers all 8 dialog button images. |
+| 8 | `Mage.Client/src/main/java/mage/client/MageFrame.java` | In `main()`, `if (Shell.isEnabled()) Shell.installLookAndFeel();` immediately before `new MageFrame()`. | Installs the LAF before any component is built, so the shell applies on first render (fixes needing a theme reselect). One guarded line inside the existing try/catch. |
 
 Icon glyph colours are tunable per theme via the `Shell.iconColor` / `Shell.iconAccent` keys in the
 FlatLaf*.properties files — independent of body-text foreground.

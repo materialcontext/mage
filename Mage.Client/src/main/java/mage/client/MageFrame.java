@@ -1605,6 +1605,11 @@ public class MageFrame extends javax.swing.JFrame implements MageClient {
 
             // FIRST GUI CALL (create main window with all prepared frames, dialogs, etc)
             try {
+                // [modern-shell] install the LAF before any UI is built so the shell applies on the
+                // first render (no theme reselect needed). Default off. See SHELL.md.
+                if (mage.client.shell.Shell.isEnabled()) {
+                    mage.client.shell.Shell.installLookAndFeel();
+                }
                 instance = new MageFrame();
                 EDTExceptionHandler.registerMainApp(instance);
             } catch (Throwable e) {

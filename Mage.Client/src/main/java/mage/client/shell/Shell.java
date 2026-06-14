@@ -46,6 +46,7 @@ public final class Shell {
     private static final String DEFAULTS_PACKAGE = "mage.client.shell";
 
     private static volatile Boolean enabledCache;
+    private static boolean defaultsRegistered;
 
     private Shell() {
     }
@@ -101,7 +102,11 @@ public final class Shell {
     public static void installLookAndFeel() throws UnsupportedLookAndFeelException {
         // Must be registered before the LAF is created so the .properties overrides are picked up.
         // FlatLaf loads FlatLaf.properties (shared) plus FlatDarkLaf/FlatLightLaf.properties (variant).
-        FlatLaf.registerCustomDefaultsSource(DEFAULTS_PACKAGE);
+        // Guarded so repeated calls (startup + theme refresh) don't register the source twice.
+        if (!defaultsRegistered) {
+            FlatLaf.registerCustomDefaultsSource(DEFAULTS_PACKAGE);
+            defaultsRegistered = true;
+        }
         UIManager.setLookAndFeel(isLightVariant() ? new FlatLightLaf() : new FlatDarkLaf());
 
         // Modernise ad-hoc /buttons/ icons across windows (deck editor, lobby, dialogs) without
