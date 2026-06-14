@@ -22,12 +22,13 @@ at a tiny, documented set of "seams."
     dated PNGs for in-game command/skip buttons, the 12 phase icons, **and the round dialog
     Accept/Cancel/Next/Prev buttons**, intercepted in the image-cache loaders. Incremental —
     unmapped icons fall back to the original art. Icon colour is tunable via `Shell.iconColor`.
-  - Deck-editor / lobby / top-menu icons (`ShellIconSweep`): search, copy, paste, import/export, nav
-    arrows, and the top menu bar (preferences, connect, deck editor, collection, feedback, images,
-    about) — swapped app-wide by a component-tree sweep keyed on the `/buttons/` and `/menu/` source
-    paths (no edits to the generated code). Mana-colour and card-type icons are left as-is. The same
-    sweep also clamps absurd hard-coded fonts (e.g. the 48pt main toolbar) to a modern size, and
-    flattens dated etched/bevel/grey-line borders into flat modern lines.
+  - Deck-editor / lobby / top-menu icons (`ShellIconSweep`): the **full deck view** (card-type
+    filters, mana-colour filters incl. on/off, rarity gems, card/list view toggles, sideboard
+    in/out, deck states, drag insert markers), plus search/copy/paste/import/export, nav arrows, and
+    the top menu bar — swapped app-wide by a component-tree sweep keyed on the `/buttons/` and
+    `/menu/` source paths (plus a tight allowlist for a couple of bare resources). No edits to the
+    generated code. The same sweep also clamps absurd hard-coded fonts (e.g. the 48pt main toolbar)
+    and flattens dated etched/bevel/grey-line borders.
 - **Match (in-game) screen — aggressive restyle** 🚧 (chosen direction: keep `GamePanel` structure
   and game logic, modernize via shell mechanisms). Started with app-wide border flattening; next:
   player-panel / phase-bar / feedback-area layout and spacing.

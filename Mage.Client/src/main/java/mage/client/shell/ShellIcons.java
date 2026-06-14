@@ -75,6 +75,52 @@ public final class ShellIcons {
         GLYPHS.put("images", ShellIcons::menuImages);
         GLYPHS.put("about", ShellIcons::menuAbout);
 
+        // ---- deck view: card-type filters ----
+        GLYPHS.put("type_land", ShellIcons::typeLand);
+        GLYPHS.put("type_creatures", ShellIcons::typeCreatures);
+        GLYPHS.put("type_artifact", ShellIcons::typeArtifact);
+        GLYPHS.put("type_enchantment", ShellIcons::typeEnchantment);
+        GLYPHS.put("type_instant", ShellIcons::typeInstant);
+        GLYPHS.put("type_sorcery", ShellIcons::typeSorcery);
+        GLYPHS.put("type_planeswalker", ShellIcons::typePlaneswalker);
+
+        // ---- deck view: mana-colour filters (filled pip = on, grey ring = off) ----
+        Color mW = new Color(0xF7, 0xF4, 0xDA), mU = new Color(0x3B, 0x7D, 0xD8);
+        Color mB = new Color(0x6E, 0x6A, 0x74), mR = new Color(0xD8, 0x48, 0x3B);
+        Color mG = new Color(0x4F, 0xA3, 0x62), mC = new Color(0xB3, 0xA8, 0x9A);
+        GLYPHS.put("color_white", (g, fg, a) -> manaPip(g, mW, true));
+        GLYPHS.put("color_white_off", (g, fg, a) -> manaPip(g, mW, false));
+        GLYPHS.put("color_blue", (g, fg, a) -> manaPip(g, mU, true));
+        GLYPHS.put("color_blueoff", (g, fg, a) -> manaPip(g, mU, false));
+        GLYPHS.put("color_black", (g, fg, a) -> manaPip(g, mB, true));
+        GLYPHS.put("color_black_off", (g, fg, a) -> manaPip(g, mB, false));
+        GLYPHS.put("color_red", (g, fg, a) -> manaPip(g, mR, true));
+        GLYPHS.put("color_red_off", (g, fg, a) -> manaPip(g, mR, false));
+        GLYPHS.put("color_green", (g, fg, a) -> manaPip(g, mG, true));
+        GLYPHS.put("color_green_off", (g, fg, a) -> manaPip(g, mG, false));
+        GLYPHS.put("colorless", (g, fg, a) -> manaPip(g, mC, true));
+        GLYPHS.put("colorless_off", (g, fg, a) -> manaPip(g, mC, false));
+
+        // ---- deck view: rarity filters (coloured gem) ----
+        GLYPHS.put("rarity_common", (g, fg, a) -> rarityGem(g, new Color(0x6B, 0x6B, 0x6B)));
+        GLYPHS.put("rarity_uncommon", (g, fg, a) -> rarityGem(g, new Color(0xA8, 0xAE, 0xB6)));
+        GLYPHS.put("rarity_rare", (g, fg, a) -> rarityGem(g, new Color(0xC9, 0xA2, 0x27)));
+        GLYPHS.put("rarity_mythic", (g, fg, a) -> rarityGem(g, new Color(0xD8, 0x60, 0x2B)));
+        GLYPHS.put("rarity_special", (g, fg, a) -> rarityGem(g, new Color(0x8A, 0x4F, 0xBF)));
+
+        // ---- deck view: view modes, sideboard, states, drag inserts ----
+        GLYPHS.put("card_panel", ShellIcons::panelCard);
+        GLYPHS.put("list_panel", ShellIcons::panelList);
+        GLYPHS.put("deck_pack", ShellIcons::deckPack);
+        GLYPHS.put("sideboard_in", ShellIcons::sideboardIn);
+        GLYPHS.put("sideboard_out", ShellIcons::sideboardOut);
+        GLYPHS.put("state_active", ShellIcons::stateActive);
+        GLYPHS.put("state_finished", ShellIcons::stateFinished);
+        GLYPHS.put("state_waiting", ShellIcons::stateWaiting);
+        GLYPHS.put("state_waiting_off", ShellIcons::stateWaiting);
+        GLYPHS.put("editor_insert_row", ShellIcons::insertRow);
+        GLYPHS.put("editor_insert_col", ShellIcons::insertCol);
+
         PHASE_GLYPHS.put("untap", ShellIcons::phaseUntap);
         PHASE_GLYPHS.put("upkeep", ShellIcons::phaseUpkeep);
         PHASE_GLYPHS.put("draw", ShellIcons::phaseDraw);
@@ -515,6 +561,201 @@ public final class ShellIcons {
         g.setColor(accent);
         g.fill(new Ellipse2D.Double(0.45, 0.30, 0.10, 0.10)); // dot
         line(g, 0.50, 0.46, 0.50, 0.68);                       // stem
+    }
+
+    // --- deck view: card-type filters -----------------------------------------------------------
+
+    private static void typeLand(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // hills
+        Path2D.Double h = new Path2D.Double();
+        h.moveTo(0.12, 0.72);
+        h.lineTo(0.34, 0.42);
+        h.lineTo(0.50, 0.60);
+        h.lineTo(0.66, 0.36);
+        h.lineTo(0.88, 0.72);
+        g.draw(h);
+        line(g, 0.12, 0.72, 0.88, 0.72);
+    }
+
+    private static void typeCreatures(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // paw print
+        g.fill(new Ellipse2D.Double(0.34, 0.50, 0.32, 0.30));  // heel pad
+        g.fill(new Ellipse2D.Double(0.24, 0.34, 0.13, 0.17));  // toes
+        g.fill(new Ellipse2D.Double(0.435, 0.27, 0.13, 0.17));
+        g.fill(new Ellipse2D.Double(0.63, 0.34, 0.13, 0.17));
+    }
+
+    private static void typeArtifact(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // gear
+        g.draw(new Ellipse2D.Double(0.30, 0.30, 0.40, 0.40));
+        for (int i = 0; i < 8; i++) {
+            double a = Math.toRadians(i * 45);
+            line(g, 0.5 + 0.20 * Math.cos(a), 0.5 + 0.20 * Math.sin(a),
+                    0.5 + 0.32 * Math.cos(a), 0.5 + 0.32 * Math.sin(a));
+        }
+        g.fill(new Ellipse2D.Double(0.44, 0.44, 0.12, 0.12)); // hub
+    }
+
+    private static void typeEnchantment(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // 4-point sparkle
+        Path2D.Double s = new Path2D.Double();
+        s.moveTo(0.50, 0.12);
+        s.lineTo(0.58, 0.42);
+        s.lineTo(0.88, 0.50);
+        s.lineTo(0.58, 0.58);
+        s.lineTo(0.50, 0.88);
+        s.lineTo(0.42, 0.58);
+        s.lineTo(0.12, 0.50);
+        s.lineTo(0.42, 0.42);
+        s.closePath();
+        g.fill(s);
+    }
+
+    private static void typeInstant(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // lightning bolt
+        Path2D.Double b = new Path2D.Double();
+        b.moveTo(0.58, 0.12);
+        b.lineTo(0.32, 0.54);
+        b.lineTo(0.47, 0.54);
+        b.lineTo(0.42, 0.88);
+        b.lineTo(0.68, 0.44);
+        b.lineTo(0.52, 0.44);
+        b.closePath();
+        g.fill(b);
+    }
+
+    private static void typeSorcery(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // arcane swirl
+        g.draw(new Arc2D.Double(0.18, 0.18, 0.64, 0.64, 40, 250, Arc2D.OPEN));
+        g.draw(new Arc2D.Double(0.34, 0.34, 0.32, 0.32, 210, 250, Arc2D.OPEN));
+    }
+
+    private static void typePlaneswalker(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // figure
+        g.fill(new Ellipse2D.Double(0.40, 0.16, 0.20, 0.20)); // head
+        Path2D.Double body = new Path2D.Double();
+        body.moveTo(0.26, 0.84);
+        body.lineTo(0.37, 0.46);
+        body.lineTo(0.63, 0.46);
+        body.lineTo(0.74, 0.84);
+        body.closePath();
+        g.fill(body);
+    }
+
+    // --- deck view: mana & rarity ---------------------------------------------------------------
+
+    private static void manaPip(Graphics2D g, Color fill, boolean on) {
+        Ellipse2D.Double c = new Ellipse2D.Double(0.16, 0.16, 0.68, 0.68);
+        if (on) {
+            g.setColor(fill);
+            g.fill(c);
+            g.setColor(new Color(0, 0, 0, 90));
+            g.draw(c);
+        } else {
+            g.setColor(new Color(0x80, 0x80, 0x80)); // inactive = grey ring
+            g.draw(c);
+        }
+    }
+
+    private static void rarityGem(Graphics2D g, Color color) {
+        Path2D.Double d = new Path2D.Double();
+        d.moveTo(0.50, 0.18);
+        d.lineTo(0.82, 0.50);
+        d.lineTo(0.50, 0.82);
+        d.lineTo(0.18, 0.50);
+        d.closePath();
+        g.setColor(color);
+        g.fill(d);
+        g.setColor(new Color(0, 0, 0, 80));
+        g.draw(d);
+    }
+
+    // --- deck view: view modes, sideboard, states, drag inserts ---------------------------------
+
+    private static void panelCard(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // single card = image view
+        g.draw(new java.awt.geom.RoundRectangle2D.Double(0.30, 0.16, 0.40, 0.68, 0.08, 0.08));
+        line(g, 0.36, 0.66, 0.64, 0.66);
+    }
+
+    private static void panelList(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // rows = list view
+        for (double y : new double[]{0.28, 0.44, 0.60, 0.76}) {
+            line(g, 0.20, y, 0.80, y);
+        }
+    }
+
+    private static void deckPack(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // booster pack
+        g.draw(new Rectangle2D.Double(0.26, 0.28, 0.48, 0.56));
+        Path2D.Double z = new Path2D.Double();
+        z.moveTo(0.26, 0.28);
+        z.lineTo(0.34, 0.20);
+        z.lineTo(0.42, 0.28);
+        z.lineTo(0.50, 0.20);
+        z.lineTo(0.58, 0.28);
+        z.lineTo(0.66, 0.20);
+        z.lineTo(0.74, 0.28);
+        g.draw(z);
+    }
+
+    private static void sideboardIn(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);
+        line(g, 0.20, 0.50, 0.60, 0.50);
+        line(g, 0.60, 0.50, 0.50, 0.40);
+        line(g, 0.60, 0.50, 0.50, 0.60);
+        g.setColor(accent);
+        line(g, 0.78, 0.20, 0.78, 0.80); // the sideboard
+    }
+
+    private static void sideboardOut(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);
+        line(g, 0.80, 0.50, 0.40, 0.50);
+        line(g, 0.40, 0.50, 0.50, 0.40);
+        line(g, 0.40, 0.50, 0.50, 0.60);
+        g.setColor(accent);
+        line(g, 0.22, 0.20, 0.22, 0.80);
+    }
+
+    private static void stateActive(Graphics2D g, Color fg, Color accent) {
+        g.setColor(new Color(0x4F, 0xB3, 0x6B));               // green = active
+        g.fill(new Ellipse2D.Double(0.30, 0.30, 0.40, 0.40));
+    }
+
+    private static void stateFinished(Graphics2D g, Color fg, Color accent) {
+        g.setColor(new Color(0x4F, 0xB3, 0x6B));               // green check = finished
+        line(g, 0.26, 0.52, 0.42, 0.68);
+        line(g, 0.42, 0.68, 0.74, 0.30);
+    }
+
+    private static void stateWaiting(Graphics2D g, Color fg, Color accent) {
+        g.setColor(fg);                                        // hourglass = waiting
+        line(g, 0.30, 0.16, 0.70, 0.16);
+        line(g, 0.30, 0.84, 0.70, 0.84);
+        Path2D.Double top = new Path2D.Double();
+        top.moveTo(0.32, 0.18); top.lineTo(0.68, 0.18); top.lineTo(0.5, 0.5); top.closePath();
+        Path2D.Double bot = new Path2D.Double();
+        bot.moveTo(0.32, 0.84); bot.lineTo(0.68, 0.84); bot.lineTo(0.5, 0.5); bot.closePath();
+        g.draw(top);
+        g.draw(bot);
+    }
+
+    private static void insertRow(Graphics2D g, Color fg, Color accent) {
+        g.setColor(accent);                                    // horizontal insertion marker
+        line(g, 0.12, 0.50, 0.88, 0.50);
+        line(g, 0.12, 0.50, 0.24, 0.42);
+        line(g, 0.12, 0.50, 0.24, 0.58);
+        line(g, 0.88, 0.50, 0.76, 0.42);
+        line(g, 0.88, 0.50, 0.76, 0.58);
+    }
+
+    private static void insertCol(Graphics2D g, Color fg, Color accent) {
+        g.setColor(accent);                                    // vertical insertion marker
+        line(g, 0.50, 0.12, 0.50, 0.88);
+        line(g, 0.50, 0.12, 0.42, 0.24);
+        line(g, 0.50, 0.12, 0.58, 0.24);
+        line(g, 0.50, 0.88, 0.42, 0.76);
+        line(g, 0.50, 0.88, 0.58, 0.76);
     }
 
     // --- phase glyphs ---------------------------------------------------------------------------

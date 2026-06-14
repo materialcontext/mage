@@ -43,6 +43,9 @@ import java.awt.image.BufferedImage;
 public final class ShellIconSweep {
 
     private static final String[] MARKERS = {"/buttons/", "/menu/"};
+    // A few icons are loaded as bare classpath resources (no /buttons/ prefix); match these by name.
+    private static final java.util.Set<String> ALLOW_BARE = new java.util.HashSet<>(java.util.Arrays.asList(
+            "editor_insert_row.png", "editor_insert_col.png"));
     // Some controls hard-code an absurd font size (e.g. the 48pt main toolbar). Clamp anything
     // larger than MAX_FONT down to TARGET_FONT so the UI reads at a modern size.
     private static final int MAX_FONT = 30;
@@ -205,10 +208,17 @@ public final class ShellIconSweep {
                 break;
             }
         }
-        if (markerEnd < 0) {
-            return null;
+        String name;
+        if (markerEnd >= 0) {
+            name = desc.substring(markerEnd);
+        } else {
+            int slash = Math.max(desc.lastIndexOf('/'), desc.lastIndexOf('\\'));
+            String base = slash >= 0 ? desc.substring(slash + 1) : desc;
+            if (!ALLOW_BARE.contains(base.toLowerCase())) {
+                return null;
+            }
+            name = base;
         }
-        String name = desc.substring(markerEnd);
         int q = name.indexOf('?');
         if (q >= 0) {
             name = name.substring(0, q);
