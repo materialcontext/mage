@@ -64,16 +64,33 @@ public final class ShellIconSweep {
             Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
                 if (event instanceof WindowEvent && event.getID() == WindowEvent.WINDOW_OPENED) {
                     Window w = ((WindowEvent) event).getWindow();
-                    SwingUtilities.invokeLater(() -> sweep(w));
+                    SwingUtilities.invokeLater(() -> sweepWindow(w));
                 }
             }, AWTEvent.WINDOW_EVENT_MASK);
             listenerInstalled = true;
         }
         for (Window w : Window.getWindows()) {
             if (w.isShowing()) {
-                sweep(w);
+                sweepWindow(w);
             }
         }
+    }
+
+    /**
+     * Force the current look-and-feel onto the whole window — the same thing a theme reselect does —
+     * so the shell applies on first render even though XMage builds its components in stages. Then
+     * apply our modern icons / fonts / borders (after, so they win over the LAF defaults).
+     */
+    private static void sweepWindow(Window w) {
+        if (w == null) {
+            return;
+        }
+        try {
+            SwingUtilities.updateComponentTreeUI(w);
+        } catch (RuntimeException ignore) {
+            // never let a cosmetic pass break the app
+        }
+        sweep(w);
     }
 
     private static void sweep(Component c) {

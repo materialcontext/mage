@@ -17,9 +17,6 @@
 .PARAMETER Theme
     Shell variant: 'dark' (default) or 'light'.
 
-.PARAMETER NoShell
-    Launch the stock (Nimbus) client instead — useful as the A/B baseline.
-
 .PARAMETER SkipBuild
     Skip the build + package steps and just (re)launch using the existing run folder.
 
@@ -30,14 +27,13 @@
     .\run-shell.ps1                 # build, then launch dark shell
     .\run-shell.ps1 -Theme light    # build, then launch light shell
     .\run-shell.ps1 -SkipBuild      # relaunch without rebuilding
-    .\run-shell.ps1 -NoShell        # launch stock client (baseline)
+    .\run-shell.ps1 -Theme light    # light variant
 #>
 
 [CmdletBinding()]
 param(
     [ValidateSet('dark', 'light')]
     [string]$Theme = 'dark',
-    [switch]$NoShell,
     [switch]$SkipBuild,
     [string]$RunDir = (Join-Path $env:USERPROFILE 'xmage-run')
 )
@@ -198,16 +194,10 @@ $clientArgs = @(
     '-Dsun.jnu.encoding=UTF-8',
     '-Djava.net.preferIPv4Stack=true'
 ) + $addOpens
-# Activate the shell via an environment variable (inherited by the launched java process). This is
-# more robust than a -Dxmage.shell=1 argument, which PowerShell can mangle (splitting at the dot).
-if ($NoShell) {
-    Write-Step 'Starting STOCK client (shell off - baseline)'
-    $env:XMAGE_SHELL = '0'
-} else {
-    Write-Step "Starting client with modern shell ($Theme)"
-    $env:XMAGE_SHELL = '1'
-    $env:XMAGE_SHELL_THEME = $Theme
-}
+# The modern shell is always on (no enable flag). Only the dark/light variant is selectable, via an
+# environment variable inherited by the launched java process.
+Write-Step "Starting client with modern shell ($Theme)"
+$env:XMAGE_SHELL_THEME = $Theme
 $clientArgs += @('-jar', "`"$($clientJar.FullName)`"")
 
 Start-Process -FilePath 'java' -ArgumentList $clientArgs -WorkingDirectory $clientRoot
@@ -222,7 +212,6 @@ Next steps in the client window:
   3. Eyeball the battlefield: phase icons, command buttons, player panel density,
      and the collapsed chat strip on the right (its badge should pulse on new messages).
 
-A/B baseline: re-run with  -NoShell  to compare against stock XMage.
 Switch variant:            -Theme light
 Relaunch without building: -SkipBuild
 "@ -ForegroundColor Gray
