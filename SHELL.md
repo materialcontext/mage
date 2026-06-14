@@ -18,6 +18,13 @@ at a tiny, documented set of "seams."
   - In-game play-control density (`ShellDensity`): trims phase icons, skip/command buttons, and the
     player panel centrally via `GUISizeHelper`. Remaining code-level items tracked in
     `SHELL_OBSERVATIONS.md` (section C).
+  - Modern flat button icons (`ShellIcons`): code-drawn, theme-coloured vector glyphs replace the
+    dated PNGs for in-game command/skip buttons, the 12 phase icons, **and the round dialog
+    Accept/Cancel/Next/Prev buttons**, intercepted in the image-cache loaders. Incremental —
+    unmapped icons fall back to the original art. Icon colour is tunable via `Shell.iconColor`.
+  - Deck-editor / lobby icons (`ShellIconSweep`): search, copy, paste, import/export, nav arrows —
+    swapped app-wide by a component-tree sweep keyed on the `/buttons/` source path (no edits to the
+    generated dialog code). Mana-colour and card-type icons are intentionally left as-is.
 - **Phase 3 — Structural / interaction** ⏳ planned (see `SHELL_OBSERVATIONS.md` for play-area leads).
 
 See `SHELL_OBSERVATIONS.md` for a passive catalog of memory and play-area/4-player observations
@@ -44,6 +51,11 @@ XMAGE_SHELL=1 XMAGE_SHELL_THEME=light   java ...   # Arcane Parchment (light)
 XMAGE_SHELL=1                           java ...   # Arcane Dark (default)
 ```
 
+> **Running on Java 17/21 directly?** XMage's networking needs deep reflective access into
+> `java.base`, or connecting fails with *"Wrong java version - check your client running scripts and
+> params"*. Add `--add-opens=java.base/java.io=ALL-UNNAMED` to **both** the client and server java
+> commands (magefree issue #12768). The Windows helper `run-shell.ps1` already includes it.
+
 ## Architecture & survivability strategy
 
 1. **Additive-first.** Nearly all shell code is new files under
@@ -68,6 +80,19 @@ to find any seam that didn't apply, and re-insert it from this table.
 | 2 | `Mage.Client/src/main/java/mage/client/util/gui/GuiDisplayUtil.java` | In `refreshThemeSettings()`, wraps the single `UIManager.setLookAndFeel("...Nimbus...")` call in `if (Shell.isEnabled()) { Shell.installLookAndFeel(); } else { ...existing Nimbus... }`. | One spot, inside the existing `try`/`catch`; the `else` keeps the original call verbatim. |
 | 3 | `Mage.Client/src/main/java/mage/client/game/GamePanel.java` | After `splitBattlefieldAndChats` is assembled, `if (Shell.isEnabled()) { ShellChat.install(splitBattlefieldAndChats, userChatPanel); }`. | One guarded line right after the split is built; `ShellChat` wraps the chat side, touching no upstream chat code. |
 | 4 | `Mage.Client/src/main/java/mage/client/util/GUISizeHelper.java` | At the end of `calculateGUISizes()`, `if (Shell.isEnabled()) { ShellDensity.applyInGameControls(); }`. | One guarded line at the method's end; only scales already-public size fields, idempotent across recomputes. |
+| 5 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `createThemeButtonImage(key)`, try `ShellIcons.renderButton(...)` first when `Shell.isEnabled()`, else fall back to the original PNG. | One guarded block in the image-cache loader; returns `null` for unmapped icons so old art is kept. Incremental and non-breaking. |
+| 6 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `createPhaseThemeButtonImage(key)`, try `ShellIcons.renderPhase(...)` first when `Shell.isEnabled()`, else fall back to the original PNG. | Same pattern as #5 for phase icons; `null` keeps the old art. |
+| 7 | `Mage.Client/src/main/java/org/mage/plugins/card/utils/impl/ImageManagerImpl.java` | In `getBufferedImageFromResource(path)`, when `Shell.isEnabled()` and the path contains `/dlg/`, try `ShellIcons.renderDialogButton(...)`, else fall back. | Single guarded line, narrowed to `/dlg/` so non-dialog images are untouched; covers all 8 dialog button images. |
+
+Icon glyph colours are tunable per theme via the `Shell.iconColor` / `Shell.iconAccent` keys in the
+FlatLaf*.properties files — independent of body-text foreground.
+
+**No new seam for deck-editor / lobby icons.** Those `/buttons/*.png` images are loaded ad-hoc
+across ~15 mostly NetBeans-generated files (no funnel). Editing them would scatter fragile seams
+through generated code, so instead `ShellIconSweep` walks each window's component tree as it opens
+and swaps any icon whose source path (`ImageIcon.getDescription()`) matches a `/buttons/<name>.png`
+we render. `ShellIconSweep.install()` is invoked from `Shell.installLookAndFeel()` (seam #2's path),
+so it adds **zero** upstream edits. Icons without a glyph (mana colours, card types) are left as-is.
 
 > Keep the seam count low. Prefer subclass-and-swap, `UIManager` overrides, and FlatLaf
 > `.properties` over editing more upstream files.
@@ -82,6 +107,8 @@ Mage.Client/
     shell/Shell.java                                  <- flag + LAF installer (new)
     shell/ShellChat.java                              <- collapsible chat + unread badge (new)
     shell/ShellDensity.java                           <- in-game control density trim (new)
+    shell/ShellIcons.java                             <- modern flat vector button icons (new)
+    shell/ShellIconSweep.java                         <- swaps ad-hoc /buttons/ icons app-wide (new)
     util/gui/GuiDisplayUtil.java                      <- seam #2 (LAF install)
     util/GUISizeHelper.java                           <- seam #4 (in-game density)
     game/GamePanel.java                               <- seam #3 (collapsible chat install)

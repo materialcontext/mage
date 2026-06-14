@@ -115,11 +115,26 @@ public enum ImageManagerImpl implements ImageManager {
     }
 
     private static BufferedImage createThemeButtonImage(ImageManagerImpl.Key key) {
+        // [modern-shell] opt-in seam: use a modern vector icon when the shell provides one for this
+        // button; otherwise fall back to the original themed PNG. Default off. See SHELL.md.
+        if (mage.client.shell.Shell.isEnabled()) {
+            BufferedImage modern = mage.client.shell.ShellIcons.renderButton(key.resourceName, key.width, key.height);
+            if (modern != null) {
+                return modern;
+            }
+        }
         String resName = PreferencesDialog.getCurrentTheme().getButtonPath(key.resourceName);
         return getBufferedImageFromResource(resName, key.width, key.height);
     }
 
     private static Image createPhaseThemeButtonImage(ImageManagerImpl.Key key) {
+        // [modern-shell] opt-in seam: modern vector phase icon when available, else original PNG.
+        if (mage.client.shell.Shell.isEnabled()) {
+            BufferedImage modern = mage.client.shell.ShellIcons.renderPhase(key.resourceName, key.height);
+            if (modern != null) {
+                return modern;
+            }
+        }
         String resName = PreferencesDialog.getCurrentTheme().getPhasePath("phase_" + key.resourceName.toLowerCase(Locale.ENGLISH) + ".png");
         return getImageFromResource(resName, key.width, key.height);
     }
@@ -481,6 +496,14 @@ public enum ImageManagerImpl implements ImageManager {
     }
 
     private static BufferedImage getBufferedImageFromResource(String path) {
+        // [modern-shell] opt-in seam: modern round dialog buttons (Accept/Cancel/Next/Prev). Only
+        // /dlg/ paths are intercepted; everything else (app icon, etc.) is untouched. See SHELL.md.
+        if (mage.client.shell.Shell.isEnabled() && path != null && path.contains("/dlg/")) {
+            BufferedImage modern = mage.client.shell.ShellIcons.renderDialogButton(path, 0);
+            if (modern != null) {
+                return modern;
+            }
+        }
         return getBufferedImageFromResource(path, 0, 0);
     }
 
