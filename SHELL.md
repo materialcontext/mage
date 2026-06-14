@@ -45,8 +45,10 @@ reachable. `Shell.isEnabled()` is kept (always returns `true`) only so the one-l
 stay readable without editing them.
 
 The LAF is installed in `MageFrame.main()` *before* the UI is built, and the component sweep runs
-`SwingUtilities.updateComponentTreeUI(window)` on every window as it opens — the same thing a theme
-reselect does — so the shell applies on first render (no reselect needed).
+`SwingUtilities.updateComponentTreeUI(...)` — the same thing a theme reselect does — on every window
+as it opens **and on every pane added to the desktop** (XMage's deck editor / collection / tables
+are `JLayeredPane` panels added on demand, not Windows, so they're caught via a `CONTAINER_EVENT`
+listener). So the shell applies on first render, no reselect needed.
 
 Only the **variant** is selectable (defaults to dark) via `XMAGE_SHELL_THEME` / `-Dxmage.shell.theme`:
 
