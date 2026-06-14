@@ -52,10 +52,10 @@ public final class ShellIconSweep {
     // larger than MAX_FONT down to TARGET_FONT so the UI reads at a modern size.
     private static final int MAX_FONT = 30;
     private static final int TARGET_FONT = 14;
-    // Original /buttons/ and /menu/ PNGs are small; render replacements larger so they're legible.
-    private static final float ICON_SCALE = 1.45f;
-    private static final int MIN_ICON = 28;
-    private static final int MAX_ICON = 64;
+    // Original /buttons/ and /menu/ PNGs are small; render icon-only buttons larger for legibility.
+    private static final float ICON_SCALE = 1.3f;
+    private static final int MIN_ICON = 26;
+    private static final int MAX_ICON = 56;
     private static boolean listenerInstalled = false;
 
     private ShellIconSweep() {
@@ -118,7 +118,7 @@ public final class ShellIconSweep {
             sweepButton((AbstractButton) c);
         } else if (c instanceof JLabel) {
             JLabel label = (JLabel) c;
-            Icon modern = modern(label.getIcon());
+            Icon modern = modern(label.getIcon(), targetFor(label, label.getText()));
             if (modern != null) {
                 label.setIcon(modern);
             }
@@ -202,29 +202,44 @@ public final class ShellIconSweep {
     }
 
     private static void sweepButton(AbstractButton b) {
+        int target = targetFor(b, b.getText());
         Icon i;
-        if ((i = modern(b.getIcon())) != null) {
+        if ((i = modern(b.getIcon(), target)) != null) {
             b.setIcon(i);
         }
-        if ((i = modern(b.getPressedIcon())) != null) {
+        if ((i = modern(b.getPressedIcon(), target)) != null) {
             b.setPressedIcon(i);
         }
-        if ((i = modern(b.getSelectedIcon())) != null) {
+        if ((i = modern(b.getSelectedIcon(), target)) != null) {
             b.setSelectedIcon(i);
         }
-        if ((i = modern(b.getRolloverIcon())) != null) {
+        if ((i = modern(b.getRolloverIcon(), target)) != null) {
             b.setRolloverIcon(i);
         }
-        if ((i = modern(b.getRolloverSelectedIcon())) != null) {
+        if ((i = modern(b.getRolloverSelectedIcon(), target)) != null) {
             b.setRolloverSelectedIcon(i);
         }
+    }
+
+    /**
+     * Desired icon size for a component. When the control also shows text, match the text line
+     * height so the icon sits inline and doesn't push the label out; for icon-only controls return
+     * 0, meaning "use the larger scaled-from-native size".
+     */
+    private static int targetFor(JComponent c, String text) {
+        if (text != null && !text.trim().isEmpty()) {
+            Font f = c.getFont();
+            int line = (f != null) ? c.getFontMetrics(f).getHeight() : TARGET_FONT;
+            return Math.max(16, Math.min(28, line + 2));
+        }
+        return 0;
     }
 
     /**
      * @return a modern replacement icon for the given icon if it was loaded from a {@code /buttons/}
      * resource we have a glyph for; otherwise {@code null} (leave the original in place).
      */
-    private static Icon modern(Icon icon) {
+    private static Icon modern(Icon icon, int requestedTarget) {
         if (!(icon instanceof ImageIcon)) {
             return null;
         }
@@ -261,9 +276,11 @@ public final class ShellIconSweep {
         if (w <= 0 || h <= 0) {
             return null;
         }
-        // The original PNGs are tiny (e.g. 24px), which reads as a small icon. Render a larger,
-        // square icon so it's comfortably visible; buttons that size to content grow to fit.
-        int target = Math.min(MAX_ICON, Math.max(MIN_ICON, Math.round(Math.max(w, h) * ICON_SCALE)));
+        // Icon+text controls pass a target matching the text height; icon-only controls pass 0 and
+        // get a larger square rendered from the (tiny) native size so they're comfortably visible.
+        int target = requestedTarget > 0
+                ? requestedTarget
+                : Math.min(MAX_ICON, Math.max(MIN_ICON, Math.round(Math.max(w, h) * ICON_SCALE)));
         BufferedImage img = ShellIcons.renderButton(name, target, target);
         if (img == null) {
             return null;
