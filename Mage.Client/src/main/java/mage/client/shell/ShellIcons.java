@@ -156,7 +156,7 @@ public final class ShellIcons {
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
             // centre a square icon box and switch to 0..1 coordinates
-            double box = Math.min(w, h) * 0.62;
+            double box = Math.min(w, h) * 0.80;
             double ox = (w - box) / 2.0;
             double oy = (h - box) / 2.0;
             g.translate(ox, oy);
@@ -186,7 +186,7 @@ public final class ShellIcons {
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-            double box = s * 0.66;
+            double box = s * 0.82;
             double o = (s - box) / 2.0;
             g.translate(o, o);
             g.scale(box, box);

@@ -5,6 +5,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -20,6 +21,7 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.ContainerEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
@@ -50,6 +52,10 @@ public final class ShellIconSweep {
     // larger than MAX_FONT down to TARGET_FONT so the UI reads at a modern size.
     private static final int MAX_FONT = 30;
     private static final int TARGET_FONT = 14;
+    // Original /buttons/ and /menu/ PNGs are small; render replacements larger so they're legible.
+    private static final float ICON_SCALE = 1.45f;
+    private static final int MIN_ICON = 28;
+    private static final int MAX_ICON = 64;
     private static boolean listenerInstalled = false;
 
     private ShellIconSweep() {
@@ -62,35 +68,45 @@ public final class ShellIconSweep {
     public static synchronized void install() {
         if (!listenerInstalled) {
             Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+                // Top-level windows (dialogs, frames) fire WINDOW_OPENED.
                 if (event instanceof WindowEvent && event.getID() == WindowEvent.WINDOW_OPENED) {
                     Window w = ((WindowEvent) event).getWindow();
-                    SwingUtilities.invokeLater(() -> sweepWindow(w));
+                    SwingUtilities.invokeLater(() -> sweepRealized(w));
                 }
-            }, AWTEvent.WINDOW_EVENT_MASK);
+                // XMage's panes (deck editor, collection, tables) are JLayeredPane panels added to
+                // the desktop on demand - not Windows - so catch them when added to a layered pane.
+                if (event instanceof ContainerEvent && event.getID() == ContainerEvent.COMPONENT_ADDED) {
+                    ContainerEvent ce = (ContainerEvent) event;
+                    if (ce.getContainer() instanceof JLayeredPane) {
+                        Component child = ce.getChild();
+                        SwingUtilities.invokeLater(() -> sweepRealized(child));
+                    }
+                }
+            }, AWTEvent.WINDOW_EVENT_MASK | AWTEvent.CONTAINER_EVENT_MASK);
             listenerInstalled = true;
         }
         for (Window w : Window.getWindows()) {
             if (w.isShowing()) {
-                sweepWindow(w);
+                sweepRealized(w);
             }
         }
     }
 
     /**
-     * Force the current look-and-feel onto the whole window — the same thing a theme reselect does —
-     * so the shell applies on first render even though XMage builds its components in stages. Then
+     * Force the current look-and-feel onto the whole subtree — the same thing a theme reselect does —
+     * so the shell applies on first render even though XMage builds/shows its UI in stages. Then
      * apply our modern icons / fonts / borders (after, so they win over the LAF defaults).
      */
-    private static void sweepWindow(Window w) {
-        if (w == null) {
+    private static void sweepRealized(Component c) {
+        if (c == null) {
             return;
         }
         try {
-            SwingUtilities.updateComponentTreeUI(w);
+            SwingUtilities.updateComponentTreeUI(c);
         } catch (RuntimeException ignore) {
             // never let a cosmetic pass break the app
         }
-        sweep(w);
+        sweep(c);
     }
 
     private static void sweep(Component c) {
@@ -245,7 +261,10 @@ public final class ShellIconSweep {
         if (w <= 0 || h <= 0) {
             return null;
         }
-        BufferedImage img = ShellIcons.renderButton(name, w, h);
+        // The original PNGs are tiny (e.g. 24px), which reads as a small icon. Render a larger,
+        // square icon so it's comfortably visible; buttons that size to content grow to fit.
+        int target = Math.min(MAX_ICON, Math.max(MIN_ICON, Math.round(Math.max(w, h) * ICON_SCALE)));
+        BufferedImage img = ShellIcons.renderButton(name, target, target);
         if (img == null) {
             return null;
         }
